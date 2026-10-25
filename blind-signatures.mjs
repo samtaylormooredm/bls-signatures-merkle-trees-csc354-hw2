@@ -18,3 +18,22 @@ export function blindSignaturesSetup() {
 
     return { privateKey, publicKeyG1, publicKeyG2 }
 }
+
+export function blindSignaturesPack(encodedMessage) {
+    // Hash the message to a point in G2: H(m)
+    const hashedMessage =
+        bls12_381.longSignatures.hash(encodedMessage)
+
+    // Generate a fresh random scalar r
+    const randomScalar =
+        bytesToNumberBE(bls12_381.utils.randomSecretKey())
+
+    // Calculate rP, where P is the generator of G2
+    const blindingPoint =
+        bls12_381.G2.Point.BASE.multiply(randomScalar)
+
+    // Blind the message: H(m) + rP
+    const blindPoint = hashedMessage.add(blindingPoint)
+
+    return { blindPoint, randomScalar }
+}
