@@ -1,7 +1,8 @@
 import {
     blindSignaturesSetup,
     blindSignaturesPack,
-    blindSignaturesSign
+    blindSignaturesSign,
+    blindSignaturesUnpack
 } from './blind-signatures.mjs'
 import { bls12_381 } from '@noble/curves/bls12-381.js'
 
@@ -41,3 +42,19 @@ const verified = bls12_381.longSignatures.verify(
 )
 
 console.log('Blinded signature verified?', verified)
+
+// Producer: unblind using the signer's G2 public key
+const signature = blindSignaturesUnpack(
+    publicKeyG2,
+    randomScalar,
+    blindSignature
+)
+
+// Verify against the ORIGINAL message hash using the G1 public key
+const finalVerified = bls12_381.longSignatures.verify(
+    signature,
+    hashedMessage,
+    publicKeyG1
+)
+
+console.log('Unblinded signature verified?', finalVerified)

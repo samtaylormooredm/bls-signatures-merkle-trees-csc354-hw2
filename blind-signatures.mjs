@@ -42,3 +42,11 @@ export function blindSignaturesSign(privateKey, blindPoint) {
     // Sign the blinded point: xS * [H(m) + rP]
     return bls12_381.longSignatures.sign(blindPoint, privateKey)
 }
+
+export function blindSignaturesUnpack(publicKey, randomScalar, blindSignature) {
+    // publicKey is the signer's G2 public key: xS * P
+    const signedBlindingPoint = publicKey.multiply(randomScalar)
+
+    // Remove xS * rP, leaving xS * H(m)
+    return blindSignature.subtract(signedBlindingPoint)
+}
