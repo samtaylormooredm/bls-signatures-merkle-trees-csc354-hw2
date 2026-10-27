@@ -1,8 +1,23 @@
 export class MerkleTree {
 	constructor(bottomLevel, hasher) {
+		if (!Number.isInteger(bottomLevel) || bottomLevel < 0) {
+            throw new Error('bottomLevel must be a nonnegative integer')
+        }
+
+		this.bottomLevel = bottomLevel
+		this.hasher = hasher
+
+		// Maximum number of leaves at this depth
+        this.capacity = 2 ** bottomLevel
+
+        // Stores hashes of the appended elements
+        this.leaves = []
+
+        // Caches calculated node hashes by their tree position
+        this.positionMap = new Map()
 	}
 
-	append(element, updateInternalState = false)
+	append(element, updateInternalState = false) {
 	}
 
 	appendAll(elements) {

@@ -4,6 +4,8 @@ import {
     blindSignaturesSign,
     blindSignaturesUnpack
 } from './blind-signatures.mjs'
+import { MerkleTree } from './merkle_tree.mjs'
+import { createHash } from 'node:crypto'
 import { bls12_381 } from '@noble/curves/bls12-381.js'
 
 const { privateKey, publicKeyG1, publicKeyG2 } =
@@ -25,14 +27,13 @@ const recoveredPoint = blindPoint.subtract(
 )
 
 console.log(
+    '---- Blind signatures testing: ----\n',
     'Removing the blinding recovers H(m)?',
     recoveredPoint.equals(hashedMessage)
 )
 
 const blindSignature =
     blindSignaturesSign(privateKey, blindPoint)
-
-console.log('Blinded signature:', blindSignature)
 
 // Check that the signer correctly signed the blinded point
 const verified = bls12_381.longSignatures.verify(
@@ -58,3 +59,15 @@ const finalVerified = bls12_381.longSignatures.verify(
 )
 
 console.log('Unblinded signature verified?', finalVerified)
+
+// Takes bytes and returns the hash as a Buffer
+const hasher = (data) =>
+    createHash('sha256').update(data).digest()
+
+const tree = new MerkleTree(3, hasher)
+
+console.log(
+    '---- Merkle tree testing: ----\n',
+    'Leaf capacity:', tree.capacity
+)
+console.log('Current leaf count:', tree.leaves.length)
