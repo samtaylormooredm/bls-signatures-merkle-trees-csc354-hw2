@@ -37,3 +37,8 @@ export function blindSignaturesPack(encodedMessage) {
 
     return { blindPoint, randomScalar }
 }
+
+export function blindSignaturesSign(privateKey, blindPoint) {
+    // Sign the blinded point: xS * [H(m) + rP]
+    return bls12_381.longSignatures.sign(blindPoint, privateKey)
+}
