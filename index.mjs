@@ -71,3 +71,48 @@ console.log(
     'Leaf capacity:', tree.capacity
 )
 console.log('Current leaf count:', tree.leaves.length)
+
+tree.append(Buffer.from('Alice'))
+tree.append(Buffer.from('Bob'))
+tree.append(Buffer.from('Charlie'))
+
+console.log('Current leaf count:', tree.leaves.length)
+
+console.log('Alice index:', tree.getBottomIndex(Buffer.from('Alice')))
+console.log('Bob index:', tree.getBottomIndex(Buffer.from('Bob')))
+console.log('Charlie index:', tree.getBottomIndex(Buffer.from('Charlie')))
+console.log('Unknown index:', tree.getBottomIndex(Buffer.from('Unknown')))
+
+// A depth-1 tree has exactly two leaf positions
+const smallTree = new MerkleTree(1, hasher)
+
+smallTree.append(Buffer.from('Alice'))
+smallTree.append(Buffer.from('Bob'), true)
+
+// Calculate the expected root directly
+const expectedRoot = hasher(Buffer.concat([
+    hasher(Buffer.from('Alice')),
+    hasher(Buffer.from('Bob'))
+]))
+
+console.log(
+    'Root matches expected hash?',
+    smallTree.getRoot().equals(expectedRoot)
+)
+
+const aliceIndex = tree.getBottomIndex(Buffer.from('Alice'))
+const [root, siblings, isLeft] = tree.getProof(aliceIndex)
+
+// Start with Alice's leaf hash
+let currentHash = hasher(Buffer.from('Alice'))
+
+// Rebuild the root using only Alice and her proof
+for (let i = 0; i < siblings.length; i++) {
+    const left = isLeft[i] ? siblings[i] : currentHash
+    const right = isLeft[i] ? currentHash : siblings[i]
+
+    currentHash = hasher(Buffer.concat([left, right]))
+}
+
+console.log('Proof reaches the root?', currentHash.equals(root))
+console.log('Number of sibling hashes:', siblings.length)
